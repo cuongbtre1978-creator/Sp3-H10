@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thí Nghiệm Rutherford</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;900&display=swap');
+
+        :root {
+            --bg-color: #e2e8f0;
+            --primary: #ff4757;
+            --secondary: #2ed573;
+            --tertiary: #1e90ff;
+            --dark-canvas: #1e272e;
+            --text-main: #2f3542;
+            --panel-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header {
+            text-align: center;
+            background: var(--panel-bg);
+            padding: 15px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            color: var(--primary);
+            font-weight: 900;
+            margin: 0 0 5px 0;
+            font-size: 2.2rem;
+            text-shadow: 2px 2px 0px rgba(255, 71, 87, 0.1);
+        }
+
+        .subtitle {
+            color: var(--tertiary);
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .main-workspace {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 850px) {
+            .main-workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .simulation-box {
+            background-color: var(--panel-bg);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .canvas-wrapper {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 4px solid #34495e;
+            background-color: var(--dark-canvas);
+            line-height: 0;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            cursor: crosshair;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .control-panel {
+            background-color: var(--panel-bg);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .cute-card {
+            background-color: #fff9e6;
+            border-left: 5px solid #ffbc42;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .cute-card b {
+            color: #d35400;
+        }
+
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 800;
+            color: #2c3e50;
+            font-size: 1.05rem;
+        }
+
+        select {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid #ced6e0;
+            outline: none;
+            cursor: pointer;
+            font-weight: 700;
+            background-color: #f1f2f6;
+            color: #2f3542;
+            transition: border-color 0.2s;
+        }
+        
+        select:hover, select:focus {
+            border-color: var(--tertiary);
+        }
+
+        button {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 800;
+            padding: 12px 10px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-shoot {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 5px 0px #d63031;
+        }
+        .btn-shoot:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0px #d63031;
+        }
+
+        .btn-shoot-single {
+            background-color: var(--tertiary);
+            color: white;
+            box-shadow: 0 5px 0px #0984e3;
+        }
+        .btn-shoot-single:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0px #0984e3;
+        }
+
+        .btn-clear {
+            background-color: var(--secondary);
+            color: white;
+            box-shadow: 0 5px 0px #21a957;
+        }
+        .btn-clear:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0px #21a957;
+        }
+
+        .stats-board {
+            background-color: #f8f9fa;
+            border: 2px dashed #ced6e0;
+            border-radius: 15px;
+            padding: 15px;
+        }
+
+        .stats-title {
+            text-align: center;
+            font-weight: 900;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #dfe4ea;
+            padding-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .stat-item span:last-child {
+            background: #2f3542;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 1rem;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .stat-straight { color: #2ed573; }
+        .stat-deflect { color: #ffa502; }
+        .stat-reflect { color: #ff4757; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="header">
+            <h1>✨ Thám Tử Hạt Nhân ✨</h1>
+            <div class="subtitle">Khám phá bí mật bên trong nguyên tử</div>
+        </div>
+
+        <div class="main-workspace">
+            <!-- Cột trái: Khu vực mô phỏng chính -->
+            <div class="simulation-box">
+                <div class="canvas-wrapper">
+                    <canvas id="rutherfordCanvas" width="800" height="450"></canvas>
+                </div>
+                <!-- 3 Nút bấm dàn ngang đẹp mắt -->
+                <div class="action-buttons">
+                    <button class="btn-shoot-single" onclick="shootSingle()">
+                        🎯 Bắn 1 Hạt
+                    </button>
+                    <button class="btn-shoot" onclick="shootBurst()">
+                        🔫 Bắn Chùm
+                    </button>
+                    <button class="btn-clear" onclick="resetSimulation()">
+                        🧹 Xóa Quỹ Đạo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cột phải: Bảng điều khiển và Thống kê -->
+            <div class="control-panel">
+                <div class="cute-card">
+                    <b>👩‍🏫 Gợi ý:</b><br>
+                    Hãy dùng nút <b>"Bắn 1 Hạt"</b> để theo dõi thật kỹ đường đi của tia Alpha nhé! Nó sẽ giúp các em thấy rõ lúc nào thì hạt bị bẻ cong.
+                </div>
+
+                <div class="setting-group">
+                    <label for="materialSelect">🧪 Chọn vật liệu lá kim loại:</label>
+                    <select id="materialSelect" onchange="changeMaterial()">
+                        <option value="gold">Lá Vàng (Au) - Z = 79</option>
+                        <option value="aluminum">Lá Nhôm (Al) - Z = 13</option>
+                    </select>
+                </div>
+
+                <div class="stats-board">
+                    <div class="stats-title">📊 BẢNG THEO DÕI</div>
+                    <div class="stat-item stat-straight">
+                        <span>➡️ Đi thẳng:</span>
+                        <span id="countStraight">0</span>
+                    </div>
+                    <div class="stat-item stat-deflect">
+                        <span>↪️ Bị lệch:</span>
+                        <span id="countDeflect">0</span>
+                    </div>
+                    <div class="stat-item stat-reflect">
+                        <span>↩️ Bật ngược:</span>
+                        <span id="countReflect">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('rutherfordCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Biến trạng thái
+        let particles = [];
+        let animationId;
+        
+        // Thống kê
+        let stats = {
+            straight: 0,
+            deflect: 0,
+            reflect: 0
+        };
+
+        // Cấu hình vật liệu
+        const materials = {
+            gold: { 
+                z: 79, 
+                color1: '#ffd700', 
+                color2: '#ffaa00', 
+                glow: 'rgba(255, 215, 0, 0)',
+                radius: 6,
+                name: 'Vàng'
+            },
+            aluminum: { 
+                z: 13, 
+                color1: '#e0e0e0', 
+                color2: '#9e9e9e', 
+                glow: 'rgba(224, 224, 224, 0)',
+                radius: 4,
+                name: 'Nhôm'
+            }
+        };
+
+        let currentMaterial = materials.gold;
+
+        // Bố trí các hạt nhân (3 hạt nhân xếp dọc)
+        const nucleiPositions = [
+            { x: 450, y: 125 },
+            { x: 450, y: 225 },
+            { x: 450, y: 325 }
+        ];
+
+        class AlphaParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = 7 + Math.random(); // Tốc độ bay ngang
+                this.vy = 0;
+                this.color = '#00ffcc'; // Màu tia alpha
+                this.radius = 2;
+                this.active = true;
+                this.counted = false;
+            }
+
+            update() {
+                if (!this.active) return;
+
+                const k = 1.5; // Hằng số lực tương tác mô phỏng
+
+                for (let pos of nucleiPositions) {
+                    let dx = this.x - pos.x;
+                    let dy = this.y - pos.y;
+                    let distSq = dx * dx + dy * dy;
+                    let distance = Math.sqrt(distSq);
+
+                    // Va chạm trực tiếp vào lõi hạt nhân
+                    if (distance < currentMaterial.radius + 2) {
+                        this.vx *= -0.8; // Bật ngược
+                        this.vy += (Math.random() - 0.5) * 5;
+                        this.x += this.vx * 2; // Đẩy nhẹ ra để tránh dính
+                        continue;
+                    }
+
+                    // Vùng ảnh hưởng lực tĩnh điện (Lực Coulomb)
+                    if (distance < 200) { 
+                        let force = (k * currentMaterial.z) / distSq; 
+                        this.vx += (dx / distance) * force;
+                        this.vy += (dy / distance) * force;
+                    }
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Kiểm tra ra khỏi màn hình & Thống kê
+                if (!this.counted) {
+                    if (this.x > canvas.width + 10) {
+                        // Bay qua bên phải
+                        let angle = Math.abs(Math.atan2(this.vy, this.vx) * 180 / Math.PI);
+                        if (angle < 2) {
+                            stats.straight++;
+                        } else {
+                            stats.deflect++;
+                        }
+                        this.counted = true;
+                        this.active = false;
+                        updateStatsUI();
+                    } else if (this.x < -10 || this.y < -10 || this.y > canvas.height + 10) {
+                        // Bật ngược về trái hoặc văng quá mạnh lên/xuống
+                        if(this.x < 450) { // Đảm bảo đếm đúng hạt bị bật ngược lại phía trước
+                           stats.reflect++;
+                           this.counted = true;
+                           this.active = false;
+                           updateStatsUI();
+                        }
+                    }
+                }
+            }
+
+            draw() {
+                if (!this.active) return;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function updateStatsUI() {
+            document.getElementById('countStraight').innerText = stats.straight;
+            document.getElementById('countDeflect').innerText = stats.deflect;
+            document.getElementById('countReflect').innerText = stats.reflect;
+        }
+
+        function changeMaterial() {
+            let select = document.getElementById('materialSelect');
+            currentMaterial = materials[select.value];
+            resetSimulation();
+        }
+
+        // CHỨC NĂNG MỚI: Bắn 1 hạt để quan sát chi tiết
+        function shootSingle() {
+            // Ngẫu nhiên chọn 1 trong 3 hạt nhân làm mục tiêu
+            let targetNucleus = nucleiPositions[Math.floor(Math.random() * nucleiPositions.length)];
+            
+            // Tạo độ lệch tâm (Impact Parameter) ngẫu nhiên để quan sát các góc lệch khác nhau
+            // Nếu lệch nhiều -> đi thẳng. Nếu lệch ít -> bẻ cong. Nếu = 0 -> bật ngược
+            let impactParameter = (Math.random() - 0.5) * 60; 
+            
+            particles.push(new AlphaParticle(0, targetNucleus.y + impactParameter));
+        }
+
+        // CHỨC NĂNG CẢI TIẾN: Bắn chùm hạt phân bố đều chuẩn khoa học
+        function shootBurst() {
+            const numParticles = 40; // Số lượng hạt mỗi lần bắn
+            const startY = 30;
+            const endY = 420;
+            const step = (endY - startY) / numParticles;
+
+            for (let i = 0; i <= numParticles; i++) {
+                setTimeout(() => {
+                    // Trải đều các hạt thay vì random, tạo ra các vệt hyperbol đối xứng tuyệt đẹp
+                    particles.push(new AlphaParticle(0, startY + (i * step)));
+                }, i * 15); // Tốc độ bắn nhanh, mượt
+            }
+        }
+
+        function resetSimulation() {
+            particles = [];
+            stats = { straight: 0, deflect: 0, reflect: 0 };
+            updateStatsUI();
+            
+            // Xóa sạch canvas
+            ctx.fillStyle = '#1e272e'; // Màu nền tĩnh
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawNuclei();
+        }
+
+        function drawNuclei() {
+            // Vẽ lớp vỏ rỗng (đường nét đứt)
+            ctx.setLineDash([4, 8]);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            for (let pos of nucleiPositions) {
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 85, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+
+            // Vẽ hạt nhân
+            for (let pos of nucleiPositions) {
+                let r = currentMaterial.radius;
+                
+                // Hiệu ứng phát sáng
+                let gradient = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, r * 4);
+                gradient.addColorStop(0, currentMaterial.color1);
+                gradient.addColorStop(1, currentMaterial.glow);
+                
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, r * 4, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Lõi đặc
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
+                ctx.fillStyle = currentMaterial.color2;
+                ctx.fill();
+            }
+        }
+
+        function animate() {
+            // CHỈNH SỬA ĐỂ MƯỢT HƠN: Fade nền tối màu để xóa bớt vệt sáng cũ
+            // rgba(30, 39, 46, 0.2) giúp lưu giữ vệt sáng vừa đủ lâu, không làm rối màn hình
+            ctx.fillStyle = 'rgba(30, 39, 46, 0.2)'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawNuclei();
+
+            // Lọc bỏ hạt đã bay khỏi màn hình để giải phóng bộ nhớ (Chống giật lag)
+            particles = particles.filter(p => p.active);
+
+            for (let p of particles) {
+                p.update();
+                p.draw();
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // Khởi động
+        resetSimulation();
+        animate();
+    </script>
+</body>
+</html>
